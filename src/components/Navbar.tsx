@@ -1,9 +1,10 @@
-import { Link, useLocation } from 'react-router-dom'
-import { Sparkles, Menu, X } from 'lucide-react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { Sparkles, Menu, X, LogOut } from 'lucide-react'
 import { useState } from 'react'
 
 function Navbar() {
   const location = useLocation()
+  const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
 
   const navItems = [
@@ -13,6 +14,10 @@ function Navbar() {
     { path: '/tryon', label: 'Try-On' },
     { path: '/chat', label: 'AI Assistant' },
   ]
+
+  const handleSignOut = () => {
+    navigate('/signin');
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/10 dark:bg-gray-900/10 border-b border-white/20">
@@ -29,20 +34,29 @@ function Navbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`px-4 py-2 rounded-lg transition-all duration-200 ${
-                  location.pathname === item.path
-                    ? 'bg-white/20 text-white backdrop-blur-sm'
-                    : 'text-gray-300 hover:text-white hover:bg-white/10'
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
+          <div className="hidden md:flex items-center">
+            <div className="flex items-center space-x-4">
+              {navItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`px-3 py-2 rounded-lg transition-all duration-200 ${
+                    location.pathname === item.path
+                      ? 'bg-white/20 text-white backdrop-blur-sm'
+                      : 'text-gray-300 hover:text-white hover:bg-white/10'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+            <button
+              onClick={handleSignOut}
+              className="ml-6 p-2 rounded-full text-gray-300 hover:text-white hover:bg-white/10"
+              aria-label="Sign out"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -71,6 +85,16 @@ function Navbar() {
                 {item.label}
               </Link>
             ))}
+            <button
+              onClick={() => {
+                handleSignOut();
+                setIsOpen(false);
+              }}
+              className="w-full text-left px-4 py-3 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 flex items-center"
+            >
+              <LogOut className="w-5 h-5 mr-3" />
+              Sign Out
+            </button>
           </div>
         )}
       </div>
@@ -79,5 +103,3 @@ function Navbar() {
 }
 
 export default Navbar
-
-
