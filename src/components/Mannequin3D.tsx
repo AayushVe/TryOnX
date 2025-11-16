@@ -16,7 +16,7 @@ function MannequinModel() {
 
   return (
     <group ref={mannequinRef}>
-      <primitive object={scene} scale={1.5} position={[0, -1.2, 0]} />
+      <primitive object={scene} scale={1.6} position={[0, -1.4, 0]} />
     </group>
   )
 }
