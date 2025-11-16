@@ -10,12 +10,22 @@ The system bridges the gap between creative fashion design and technical impleme
 - 3D garment visualization with physics simulation
 - Interactive fabric and lighting customization
 - AI fashion assistant for design consultation
+- Interactive 3D mannequin model in hero section with drag-to-rotate and zoom controls
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
 
 ## System Architecture
+
+## Recent Changes
+
+- **November 16, 2025**: Integrated custom 3D mannequin model (GLB format) in home page hero section
+  - Model located at `public/mannequin.glb` (2.8MB)
+  - Interactive OrbitControls: drag to rotate, scroll to zoom
+  - Enhanced lighting with multiple colored point lights (indigo, purple gradients)
+  - Gentle floating animation for visual interest
+  - Error handling for WebGL context issues
 
 ### Frontend Architecture
 
