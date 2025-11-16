@@ -8,7 +8,7 @@ function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
 
   const navItems = [
-    { path: '/', label: 'Home' },
+    { path: '/home', label: 'Home' },
     { path: '/generate', label: 'Generate' },
     { path: '/sketch', label: 'Sketch' },
     { path: '/tryon', label: 'Try-On' },
@@ -23,7 +23,7 @@ function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-white/10 dark:bg-gray-900/10 border-b border-white/20">
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center space-x-2 group">
+          <Link to="/home" className="flex items-center space-x-2 group">
             <div className="relative">
               <Sparkles className="w-8 h-8 text-indigo-500 group-hover:text-indigo-400 transition-colors" />
               <div className="absolute inset-0 bg-indigo-500/20 blur-xl rounded-full"></div>
