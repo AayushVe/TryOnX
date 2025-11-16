@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const API_BASE_URL = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' ? `https://${window.location.hostname}:8000` : 'http://localhost:8000')
 
 export interface GenerateRequest {
   prompt: string
