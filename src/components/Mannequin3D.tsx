@@ -16,7 +16,7 @@ function MannequinModel() {
 
   return (
     <group ref={mannequinRef}>
-      <primitive object={scene} scale={1.5} position={[0, -1, 0]} />
+      <primitive object={scene} scale={1.5} position={[0, -1.2, 0]} />
     </group>
   )
 }
@@ -27,7 +27,7 @@ export default function Mannequin3D() {
       <OrbitControls
         enablePan={false}
         enableZoom={true}
-        minDistance={2}
+        minDistance={1.5}
         maxDistance={6}
         minPolarAngle={Math.PI / 6}
         maxPolarAngle={Math.PI / 1.5}

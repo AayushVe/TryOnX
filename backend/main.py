@@ -3,12 +3,34 @@ TryOnX Backend API
 FastAPI server for AI-powered fashion design and virtual try-on
 """
 
-from fastapi import FastAPI, File, UploadFile, HTTPException
+import os
+import json
+from fastapi import FastAPI, File, UploadFile, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 from typing import Optional, List
 import uvicorn
+import firebase_admin
+from firebase_admin import credentials, auth
+from dotenv import load_dotenv
+
+# Load environment variables from .env
+load_dotenv()
+
+# Initialize Firebase Admin SDK
+service_account_info = os.getenv("FIREBASE_SERVICE_ACCOUNT")
+if service_account_info:
+    try:
+        # The service account info is a string, so it needs to be parsed as JSON
+        cred = credentials.Certificate(json.loads(service_account_info))
+        firebase_admin.initialize_app(cred)
+    except json.JSONDecodeError:
+        raise ValueError("Could not parse FIREBASE_SERVICE_ACCOUNT. Please check the format in your .env file.")
+    except Exception as e:
+        raise ValueError(f"Error initializing Firebase Admin SDK: {e}")
+
 
 app = FastAPI(
     title="TryOnX API",
@@ -19,11 +41,30 @@ app = FastAPI(
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"], # In production, restrict this to your frontend URL
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# OAuth2 scheme to extract the token from the Authorization header
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+# Dependency to verify Firebase ID token
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    if not service_account_info:
+        # If Firebase is not configured, bypass authentication for development
+        return {"uid": "development_user"} 
+    try:
+        decoded_token = auth.verify_id_token(token)
+        return decoded_token
+    except auth.InvalidIdTokenError:
+        raise HTTPException(status_code=401, detail="Invalid ID token")
+    except auth.ExpiredIdTokenError:
+        raise HTTPException(status_code=401, detail="Expired ID token")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Token verification failed: {e}")
+
 
 # Request Models
 class PromptRequest(BaseModel):
@@ -52,9 +93,22 @@ async def root():
 async def health():
     return {"status": "healthy"}
 
+
+# --- Protected Routes ---
+
+@app.get("/api/user/me")
+async def get_user_profile(current_user: dict = Depends(get_current_user)):
+    """
+    Get the profile of the currently authenticated user.
+    """
+    uid = current_user.get("uid")
+    # You can fetch additional user data from your database here
+    return {"status": "success", "user_id": uid}
+
+
 # AI Prompt-Based Generation
 @app.post("/api/generate")
-async def generate_design(request: PromptRequest):
+async def generate_design(request: PromptRequest, current_user: dict = Depends(get_current_user)):
     """
     Generate 2D fashion design from text prompt using LLaMA 3 + ControlNet/SDXL
     """
@@ -66,14 +120,15 @@ async def generate_design(request: PromptRequest):
             "status": "success",
             "image_url": "https://via.placeholder.com/512x512/6366f1/ffffff?text=Generated+Design",
             "prompt": request.prompt,
-            "processing_time": 2.5
+            "processing_time": 2.5,
+            "user_id": current_user.get("uid")
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 # Sketch-to-Design
 @app.post("/api/sketch/refine")
-async def refine_sketch(request: SketchRequest):
+async def refine_sketch(request: SketchRequest, current_user: dict = Depends(get_current_user)):
     """
     Refine sketch using YOLOv8 for component detection + ControlNet
     """
@@ -91,7 +146,7 @@ async def refine_sketch(request: SketchRequest):
 
 # Cloth Image Processing
 @app.post("/api/fabric/process")
-async def process_fabric(request: FabricRequest):
+async def process_fabric(request: FabricRequest, current_user: dict = Depends(get_current_user)):
     """
     Extract fabric texture, color, and folds from cloth image
     """
@@ -111,7 +166,7 @@ async def process_fabric(request: FabricRequest):
 
 # 2D to 3D Conversion
 @app.post("/api/convert/2d-to-3d")
-async def convert_to_3d(image_url: str, garment_type: str = "top"):
+async def convert_to_3d(image_url: str, garment_type: str = "top", current_user: dict = Depends(get_current_user)):
     """
     Convert 2D design to 3D mesh using Blender + Kaolin neural reconstruction
     """
@@ -130,7 +185,7 @@ async def convert_to_3d(image_url: str, garment_type: str = "top"):
 
 # AI Chatbot
 @app.post("/api/chat")
-async def chat(request: ChatMessage):
+async def chat(request: ChatMessage, current_user: dict = Depends(get_current_user)):
     """
     Fashion-specialized LLM assistant powered by LLaMA 3
     """
@@ -147,7 +202,7 @@ async def chat(request: ChatMessage):
 
 # File Upload
 @app.post("/api/upload")
-async def upload_file(file: UploadFile = File(...)):
+async def upload_file(file: UploadFile = File(...), current_user: dict = Depends(get_current_user)):
     """
     Upload image files (sketches, fabric photos, etc.)
     """
@@ -164,5 +219,3 @@ async def upload_file(file: UploadFile = File(...)):
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
-
-

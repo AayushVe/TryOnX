@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Generate from './pages/Generate';
@@ -8,10 +8,13 @@ import Chat from './pages/Chat';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
 
-function App() {
+const AppContent = () => {
+  const location = useLocation();
+  const noNavRoutes = ['/signin', '/signup'];
+
   return (
-    <Router>
-      <Navbar />
+    <>
+      {!noNavRoutes.includes(location.pathname) && <Navbar />}
       <Routes>
         <Route path="/" element={<Navigate to="/signin" replace />} />
         <Route path="/home" element={<Home />} />
@@ -22,6 +25,14 @@ function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
       </Routes>
+    </>
+  );
+};
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }
