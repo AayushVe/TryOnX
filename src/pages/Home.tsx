@@ -266,9 +266,9 @@ function Home() {
 
             <div className="grid md:grid-cols-3 gap-8">
               {[
-                { name: 'Holographic PVC', color: 'from-indigo-500/20 to-purple-500/20' },
-                { name: 'Prism Lucite', color: 'from-purple-500/20 to-pink-500/20' },
-                { name: 'Metallic Leather', color: 'from-pink-500/20 to-red-500/20' },
+                { name: 'Holographic PVC', color: 'from-indigo-500/20 to-purple-500/20', image: '/holographic-pvc.jpg' },
+                { name: 'Prism Lucite', color: 'from-purple-500/20 to-pink-500/20', image: '/prism-lucite.jpg' },
+                { name: 'Metallic Leather', color: 'from-pink-500/20 to-red-500/20', image: '/metallic-leather.jpg' },
               ].map((material, idx) => (
                 <motion.div
                   key={idx}
@@ -280,9 +280,9 @@ function Home() {
                   className="relative h-96 rounded-3xl overflow-hidden cursor-pointer group"
                 >
                   <div className={`absolute inset-0 bg-gradient-to-br ${material.color} backdrop-blur-xl`}></div>
+                  <img src={material.image} className="absolute inset-0 w-full h-full object-cover opacity-50 group-hover:opacity-75 transition-opacity" />
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center space-y-4">
-                      <div className="w-32 h-32 mx-auto rounded-full bg-white/10 backdrop-blur-xl border border-white/20 group-hover:scale-110 transition-transform"></div>
                       <h3 className="text-2xl font-light text-white">{material.name}</h3>
                     </div>
                   </div>
